@@ -1,0 +1,37 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Main.gd" type="Script" id=1]
+
+[node name="Main" type="Node2D"]
+pause_mode = 2
+script = ExtResource( 1 )
+
+[node name="container" type="ViewportContainer" parent="."]
+pause_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_right = 1600.0
+margin_bottom = 900.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+
+[node name="view" type="Viewport" parent="container"]
+size = Vector2( 1600, 900 )
+handle_input_locally = false
+render_target_update_mode = 3
+
+[node name="scoreboard" type="Node2D" parent="."]
+scale = Vector2( 3, 3 )
+
+[node name="label" type="Label" parent="scoreboard"]
+margin_right = 454.0
+margin_bottom = 66.0
+
+[node name="healthbar" type="Node2D" parent="."]
+position = Vector2( 712.861, 506.002 )
+scale = Vector2( 2, 2 )
+
+[node name="label" type="Label" parent="healthbar"]
+margin_right = 153.0
+margin_bottom = 33.0
