@@ -1,3 +1,9 @@
+SplitShot :
+A simple bullet hell, implemented as part of learning Godot engine.
+
+
+Game Rules:
+
 - Shoot enemies to score.
 - Enemies have a chance to spawn an additional enemy when shot.
 - If enemies hit you, you lose health. Game over if health drops to 0.
