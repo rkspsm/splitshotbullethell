@@ -50,7 +50,7 @@ _global_script_class_icons={
 
 [application]
 
-config/name="tdef001"
+config/name="SplitShot"
 run/main_scene="res://Main.tscn"
 
 [display]
