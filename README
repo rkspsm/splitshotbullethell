@@ -9,5 +9,6 @@ Game Rules:
 - If enemies hit you, you lose health. Game over if health drops to 0.
 - Missed shots hit the walls and award a small negative score.
 - Dont get hit for some duration to get passive health regen.
-- If you are in a corner, then postive scores or health regen are NOT awarded.
+- Health Regen and Positive Scores are only awarded if you are relatively near center, and not if you wander too far into diagonal corners.
+- After taking damage, you are immune for a short time, but will still get knocked back and will also be counted towards delay before health regen kicks in.
 

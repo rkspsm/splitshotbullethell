@@ -9,7 +9,7 @@ func _ready():
 func setup(p_position:Vector2, p_rotation:float):
 	position = p_position + Vector2(50,0).rotated(p_rotation)
 	rotation = p_rotation
-	apply_impulse(p_position, Vector2(1500,0).rotated(p_rotation))
+	apply_impulse(p_position, Vector2(2500,0).rotated(p_rotation))
 
 signal score (v)
 

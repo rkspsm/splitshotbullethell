@@ -13,8 +13,10 @@ var player_cam_pos: Vector2
 
 func _ready():
 	player_cam_pos = get_viewport().get_visible_rect().size * 0.5
-
-func _physics_process(delta):
+	
+var idelta:float = 0
+	
+func _integrate_forces(state):
 	var hinput = 0
 	if Input.is_action_pressed("ui_left"):
 		hinput = -1
@@ -29,15 +31,22 @@ func _physics_process(delta):
 		
 	var impulse_vector = Vector2(hinput, vinput).normalized() * impulse_amount
 	
-	self.apply_impulse(position - impulse_vector, impulse_vector * delta * DELTA_FACTOR)
+	#self.apply_impulse(position - impulse_vector, impulse_vector * delta * DELTA_FACTOR)
+	self.apply_impulse(state.get_transform().get_origin() - impulse_vector, impulse_vector * idelta * DELTA_FACTOR)
+	idelta = 0
 	
 	var mpos = get_viewport().get_mouse_position()
 	var mdiff = mpos - player_cam_pos
 	if mdiff.length() > 0:
 		rotation = mdiff.angle()
+
+func _physics_process(delta):
+
+	idelta += delta
 		
+	last_fired += delta	
 	if Input.is_action_pressed("ui_fire"):
-		last_fired += delta
+		
 		if last_fired > fire_delay:
 			last_fired = 0
 			emit_signal("weapon_fire", position, rotation)

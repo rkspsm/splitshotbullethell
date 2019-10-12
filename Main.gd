@@ -20,10 +20,12 @@ var current_score = 0
 var current_health:float = 100
 
 export (float) var wait_before_healing = 3.0
-export (float) var wait_between_heals = 2.0
-export (float) var multiply_consecutive_heals = 1.2
-export (float) var base_heal_amount = 2.5
+export (float) var wait_between_heals = 1.2
+export (float) var multiply_consecutive_heals = 1.5
+export (float) var base_heal_amount = 4.0
 export (float) var max_heal_distance_fraction = 0.4
+export (float) var damage_immunity_duration_after_hit = 0.5
+export (float) var damage_per_hit = 7.0
 
 var map_center: Vector2;
 var heal_dist: float;
@@ -80,11 +82,15 @@ func _on_player_weapon_fire(p_position, p_rotation):
 	game_container.add_child(projectile)
 	projectile.connect("score", self, "add_and_update_scoreboard")
 	
+var relative_time:float = 0
 var player_just_hit:bool = false
+var last_dmg_time:float = -(damage_immunity_duration_after_hit + 1)
 func _on_player_body_entered(body):
 	if body.is_in_group("enemies"):
 		player_just_hit = true
-		add_and_update_healthbar(-7)
+		if relative_time - last_dmg_time > damage_immunity_duration_after_hit:
+			last_dmg_time = relative_time
+			add_and_update_healthbar(-damage_per_hit)
 	
 func enemy_shot(body):
 	if body.get_name() == "Projectile":
@@ -117,7 +123,7 @@ func _input(event):
 			dialog_gameover = null
 			reset()
 	elif dialog_gamepause != null:
-		if event.is_action_pressed("ui_cancel"):
+		if event.is_action_pressed("ui_accept"):
 			dialog_gamepause.queue_free()
 			dialog_gamepause = null
 			get_tree().paused = false
@@ -136,6 +142,7 @@ var time_passed_since_last_hit:float = 0
 var last_heal_done:float = base_heal_amount
 var time_passed_since_last_heal:float = 0
 func _process(delta):
+	relative_time += delta
 	if dialog_gameover == null and dialog_gamepause == null:
 		if player_just_hit:
 			player_just_hit = false
