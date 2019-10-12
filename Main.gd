@@ -19,6 +19,9 @@ func _ready():
 var current_score = 0
 var current_health:float = 100
 
+export (float) var initial_impulse_on_split = 100.0
+export (float) var incremental_impulse_on_split = 50.0
+
 export (float) var wait_before_healing = 3.0
 export (float) var wait_between_heals = 1.2
 export (float) var multiply_consecutive_heals = 1.5
@@ -91,7 +94,8 @@ func _on_player_body_entered(body):
 		if relative_time - last_dmg_time > damage_immunity_duration_after_hit:
 			last_dmg_time = relative_time
 			add_and_update_healthbar(-damage_per_hit)
-	
+
+var impulse_on_split = initial_impulse_on_split
 func enemy_shot(body):
 	if body.get_name() == "Projectile":
 		if randf() < 0.4:
@@ -99,8 +103,9 @@ func enemy_shot(body):
 			var daughter = Enemy.instance()
 			daughter.set_position(p + body.get_linear_velocity().normalized()*25)
 			var shift = Vector2(1,0).rotated(deg2rad(randi()%360))
-			daughter.apply_impulse(p + shift*100, -shift*500) 
+			daughter.apply_impulse(p + shift*100, -shift*impulse_on_split) 
 			yield(get_tree().create_timer(0.0), "timeout")
+			impulse_on_split += incremental_impulse_on_split
 			game_container.add_child(daughter)
 			connect_enemy_shot(daughter)
 	
