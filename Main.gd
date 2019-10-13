@@ -19,21 +19,20 @@ func _ready():
 var current_score = 0
 var current_health:float = 100
 
-export (float) var initial_impulse_on_split = 100.0
-export (float) var incremental_impulse_on_split = 50.0
-
 export (float) var wait_before_healing = 3.0
 export (float) var wait_between_heals = 1.2
 export (float) var multiply_consecutive_heals = 1.5
-export (float) var base_heal_amount = 4.0
 export (float) var max_heal_distance_fraction = 0.4
 export (float) var damage_immunity_duration_after_hit = 0.5
-export (float) var damage_per_hit = 7.0
 
 var map_center: Vector2;
 var heal_dist: float;
+var time_elapsed: float;
+var current_enemies = 1
 
 func reset():
+	time_elapsed = 0
+	current_enemies = 1
 	get_tree().paused = false
 	get_tree().call_group("temporaries", "queue_free")
 	yield(get_tree().create_timer(0.0), "timeout")
@@ -65,7 +64,10 @@ func reset():
 	
 	current_health = 100
 	add_and_update_healthbar(0.0)
-	last_heal_done = base_heal_amount
+	last_heal_done = get_base_heal_amount()
+	
+	impulse_on_split = initial_impulse_on_split
+	current_projectile_mass = initial_projectile_mass
 
 func add_and_update_scoreboard(v:int):
 	if v>0 and (not is_player_near_center()):
@@ -78,12 +80,40 @@ func add_and_update_healthbar(v:float):
 	$healthbar/label.set_text("HP: %d %%" % current_health)
 	if current_health <= 0:
 		_on_gameover()
+		
+export (float) var initial_impulse_on_split = 100.0
+export (float) var initial_projectile_mass = 0.25
 
+func get_current_impulse_on_hit():
+	#return 100.0 + current_enemies * 25
+	return 500.0
+	
+func get_current_projectile_mass():
+	#return 0.25 + current_enemies * 0.04
+	return 1.0
+	
+func get_current_score_on_hit():
+	return round(10.0 + 30 / (1 + 0.2*current_enemies))
+	
+func get_current_score_on_miss():
+	return 5.0 + 500 / (1 + 0.5*current_enemies*current_enemies)
+	
+func get_current_damage():
+	return 7.0 + 0.2*current_enemies
+
+func on_projectile_score(score_sign):
+	if score_sign > 0:
+		add_and_update_scoreboard(get_current_score_on_hit())
+	elif score_sign < 0:
+		add_and_update_scoreboard(-get_current_score_on_miss())
+
+var current_projectile_mass = initial_projectile_mass
 func _on_player_weapon_fire(p_position, p_rotation):
 	var projectile = Projectile.instance()
+	projectile.set_mass(current_projectile_mass)
 	projectile.setup(p_position, p_rotation)
 	game_container.add_child(projectile)
-	projectile.connect("score", self, "add_and_update_scoreboard")
+	projectile.connect("score", self, "on_projectile_score")
 	
 var relative_time:float = 0
 var player_just_hit:bool = false
@@ -93,7 +123,7 @@ func _on_player_body_entered(body):
 		player_just_hit = true
 		if relative_time - last_dmg_time > damage_immunity_duration_after_hit:
 			last_dmg_time = relative_time
-			add_and_update_healthbar(-damage_per_hit)
+			add_and_update_healthbar(-get_current_damage())
 
 var impulse_on_split = initial_impulse_on_split
 func enemy_shot(body):
@@ -105,7 +135,9 @@ func enemy_shot(body):
 			var shift = Vector2(1,0).rotated(deg2rad(randi()%360))
 			daughter.apply_impulse(p + shift*100, -shift*impulse_on_split) 
 			yield(get_tree().create_timer(0.0), "timeout")
-			impulse_on_split += incremental_impulse_on_split
+			current_enemies += 1
+			impulse_on_split = get_current_impulse_on_hit()
+			current_projectile_mass = get_current_projectile_mass()
 			game_container.add_child(daughter)
 			connect_enemy_shot(daughter)
 	
@@ -143,16 +175,20 @@ func is_player_near_center():
 	var dist_from_center = (player.position - map_center).length()
 	return dist_from_center <= heal_dist
 			
+func get_base_heal_amount():
+	return 4.0 + (0.2*current_enemies)
+			
 var time_passed_since_last_hit:float = 0
-var last_heal_done:float = base_heal_amount
+var last_heal_done:float = get_base_heal_amount()
 var time_passed_since_last_heal:float = 0
 func _process(delta):
 	relative_time += delta
+	time_elapsed += delta
 	if dialog_gameover == null and dialog_gamepause == null:
 		if player_just_hit:
 			player_just_hit = false
 			time_passed_since_last_hit = 0
-			last_heal_done = base_heal_amount
+			last_heal_done = get_base_heal_amount()
 			time_passed_since_last_heal = wait_before_healing + 1
 		else:
 			time_passed_since_last_hit += delta

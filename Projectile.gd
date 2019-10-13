@@ -15,7 +15,7 @@ signal score (v)
 
 func _on_Projectile_body_entered(body):
 	if body.is_in_group("wall"):
-		emit_signal("score", -5)
+		emit_signal("score", -1)
 	if body.is_in_group("enemies"):
-		emit_signal("score", 20)
+		emit_signal("score", 1)
 	queue_free()

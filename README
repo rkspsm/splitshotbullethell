@@ -12,4 +12,11 @@ Game Rules:
 - Health Regen and Positive Scores are only awarded if you are relatively near center, and not if you wander too far into diagonal corners.
 - After taking damage, you are immune for a short time, but will still get knocked back and will also be counted towards delay before health regen kicks in.
 
+Controls:
+
+- W,S,A,D : movement
+- left mouse : fire
+- escape : pause
+- space : unpause, new game after end
+- right mouse : enables precise movement mode, you move towards mouse, with slower speed if pointer is close to character. WSAD and firing is disabled in this mode
 
